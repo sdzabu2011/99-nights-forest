@@ -1,0 +1,1 @@
+// LoginScreen handled directly in main.js for simplicity

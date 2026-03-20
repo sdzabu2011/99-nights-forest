@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>99 Nights in the Forest</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Login Screen -->
+  <div id="login-screen">
+    <div class="login-container">
+      <div class="game-title">
+        <h1>🌲 99 NIGHTS</h1>
+        <h2>IN THE FOREST</h2>
+        <p class="subtitle">Survive the darkness... if you can</p>
+      </div>
+
+      <div class="login-form">
+        <input type="text" id="username-input" placeholder="Enter your username..."
+               maxlength="16" autocomplete="off">
+        <button id="play-btn" onclick="startGame()">
+          ▶ ENTER THE FOREST
+        </button>
+        <p id="login-error" class="error-text"></p>
+      </div>
+
+      <div class="game-info">
+        <p>🎮 WASD - Move | SHIFT - Run | F - Flashlight</p>
+        <p>🖱️ Mouse - Look Around | E - Interact | T - Chat</p>
+        <p>👻 Survive 99 nights in the haunted forest...</p>
+      </div>
+
+      <div class="online-count">
+        <span id="online-players">0</span> players online
+      </div>
+    </div>
+  </div>
+
+  <!-- Loading Screen -->
+  <div id="loading-screen" style="display:none;">
+    <div class="loading-container">
+      <h2>Entering the Forest...</h2>
+      <div class="loading-bar">
+        <div class="loading-progress" id="loading-progress"></div>
+      </div>
+      <p id="loading-text">Loading world data...</p>
+    </div>
+  </div>
+
+  <!-- Game HUD -->
+  <div id="game-hud" style="display:none;">
+    <!-- Top bar -->
+    <div class="hud-top">
+      <div class="night-counter">
+        NIGHT <span id="night-number">1</span> / 99
+      </div>
+      <div class="time-display">
+        <div class="time-bar">
+          <div class="time-progress" id="time-progress"></div>
+          <span id="time-icon">🌙</span>
+        </div>
+      </div>
+      <div class="weather-display" id="weather-display">
+        ☀️ Clear
+      </div>
+    </div>
+
+    <!-- Stats bars -->
+    <div class="hud-stats">
+      <div class="stat-bar">
+        <span class="stat-icon">❤️</span>
+        <div class="bar-container">
+          <div class="bar-fill health-bar" id="health-bar"></div>
+        </div>
+        <span class="stat-value" id="health-value">100</span>
+      </div>
+      <div class="stat-bar">
+        <span class="stat-icon">⚡</span>
+        <div class="bar-container">
+          <div class="bar-fill stamina-bar" id="stamina-bar"></div>
+        </div>
+        <span class="stat-value" id="stamina-value">100</span>
+      </div>
+      <div class="stat-bar">
+        <span class="stat-icon">🍖</span>
+        <div class="bar-container">
+          <div class="bar-fill hunger-bar" id="hunger-bar"></div>
+        </div>
+        <span class="stat-value" id="hunger-value">100</span>
+      </div>
+      <div class="stat-bar">
+        <span class="stat-icon">🧠</span>
+        <div class="bar-container">
+          <div class="bar-fill sanity-bar" id="sanity-bar"></div>
+        </div>
+        <span class="stat-value" id="sanity-value">100</span>
+      </div>
+    </div>
+
+    <!-- Crosshair -->
+    <div class="crosshair" id="crosshair">+</div>
+
+    <!-- Interaction prompt -->
+    <div class="interaction-prompt" id="interaction-prompt" style="display:none;">
+      <p>Press <span class="key">E</span> to <span id="interaction-text">interact</span></p>
+    </div>
+
+    <!-- Inventory -->
+    <div class="inventory-bar" id="inventory-bar">
+      <div class="inv-slot" data-slot="0"></div>
+      <div class="inv-slot" data-slot="1"></div>
+      <div class="inv-slot" data-slot="2"></div>
+      <div class="inv-slot" data-slot="3"></div>
+      <div class="inv-slot" data-slot="4"></div>
+      <div class="inv-slot" data-slot="5"></div>
+      <div class="inv-slot" data-slot="6"></div>
+      <div class="inv-slot" data-slot="7"></div>
+    </div>
+
+    <!-- Flashlight indicator -->
+    <div class="flashlight-indicator" id="flashlight-indicator">
+      🔦 OFF
+    </div>
+
+    <!-- Player list -->
+    <div class="player-list" id="player-list">
+      <h3>🌲 Players</h3>
+      <ul id="player-list-items"></ul>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-container" id="chat-container">
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-container" id="chat-input-container" style="display:none;">
+        <input type="text" id="chat-input" placeholder="Type a message..."
+               maxlength="200" autocomplete="off">
+      </div>
+    </div>
+
+    <!-- Announcements -->
+    <div class="announcements" id="announcements"></div>
+
+    <!-- Minimap -->
+    <div class="minimap" id="minimap">
+      <canvas id="minimap-canvas" width="150" height="150"></canvas>
+    </div>
+
+    <!-- Score -->
+    <div class="score-display">
+      Score: <span id="score-value">0</span>
+    </div>
+  </div>
+
+  <!-- Death Screen -->
+  <div id="death-screen" style="display:none;">
+    <div class="death-container">
+      <h1 class="death-title">YOU DIED</h1>
+      <p class="death-cause" id="death-cause">The forest claimed another soul...</p>
+      <p class="death-stats">
+        Survived <span id="death-nights">0</span> nights |
+        Score: <span id="death-score">0</span>
+      </p>
+      <button class="respawn-btn" onclick="respawn()">🔄 TRY AGAIN</button>
+    </div>
+  </div>
+
+  <!-- Canvas container for Three.js -->
+  <div id="game-container"></div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+  <script src="js/utils/Helpers.js"></script>
+  <script src="js/utils/Controls.js"></script>
+  <script src="js/game/DayNightCycle.js"></script>
+  <script src="js/game/Weather.js"></script>
+  <script src="js/game/Forest.js"></script>
+  <script src="js/game/Player.js"></script>
+  <script src="js/game/Monster.js"></script>
+  <script src="js/game/Campfire.js"></script>
+  <script src="js/game/Inventory.js"></script>
+  <script src="js/game/AudioManager.js"></script>
+  <script src="js/network/NetworkManager.js"></script>
+  <script src="js/ui/UIManager.js"></script>
+  <script src="js/ui/LoginScreen.js"></script>
+  <script src="js/ui/HUD.js"></script>
+  <script src="js/ui/Chat.js"></script>
+  <script src="js/game/Game.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>
